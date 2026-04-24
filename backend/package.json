@@ -1,0 +1,20 @@
+{
+  "name": "ai-esports-performance-analyzer-backend",
+  "version": "1.0.0",
+  "description": "Backend for AI Esports Performance Analyzer",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "db:init": "psql -h localhost -U postgres -d esports_analyzer -f db/schema.sql && psql -h localhost -U postgres -d esports_analyzer -f db/seed.sql"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "jsonwebtoken": "^9.0.2",
+    "node-fetch": "^2.7.0",
+    "pg": "^8.13.0"
+  }
+}
