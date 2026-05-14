@@ -10,23 +10,37 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD,
 });
 
-// GET /api/matches - list all matches with team names
+// GET /api/matches - list all matches with team names (paginated)
 router.get('/', async (req, res) => {
   try {
-    const result = await pool.query(
-      `SELECT m.*,
-              t1.name AS team1_name, t1.game AS team1_game,
-              t2.name AS team2_name, t2.game AS team2_game,
-              w.name AS winner_name,
-              tr.name AS tournament_name
-       FROM matches m
-       LEFT JOIN teams t1 ON m.team1_id = t1.id
-       LEFT JOIN teams t2 ON m.team2_id = t2.id
-       LEFT JOIN teams w ON m.winner_id = w.id
-       LEFT JOIN tournaments tr ON m.tournament_id = tr.id
-       ORDER BY m.match_date DESC`
-    );
-    res.json(result.rows);
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
+    const offset = (page - 1) * limit;
+
+    const [dataResult, countResult] = await Promise.all([
+      pool.query(
+        `SELECT m.*,
+                t1.name AS team1_name, t1.game AS team1_game,
+                t2.name AS team2_name, t2.game AS team2_game,
+                w.name AS winner_name,
+                tr.name AS tournament_name
+         FROM matches m
+         LEFT JOIN teams t1 ON m.team1_id = t1.id
+         LEFT JOIN teams t2 ON m.team2_id = t2.id
+         LEFT JOIN teams w ON m.winner_id = w.id
+         LEFT JOIN tournaments tr ON m.tournament_id = tr.id
+         ORDER BY m.match_date DESC
+         LIMIT $1 OFFSET $2`,
+        [limit, offset]
+      ),
+      pool.query('SELECT COUNT(*) FROM matches'),
+    ]);
+
+    const total = parseInt(countResult.rows[0].count);
+    res.json({
+      data: dataResult.rows,
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+    });
   } catch (err) {
     console.error('Get matches error:', err);
     res.status(500).json({ error: 'Internal server error.' });
@@ -70,6 +84,10 @@ router.post('/', async (req, res) => {
       score_team1, score_team2, map, duration_minutes,
       winner_id, vod_url, notes,
     } = req.body;
+
+    if (!team1_id || !team2_id || !match_date) {
+      return res.status(400).json({ error: 'team1_id, team2_id, and match_date are required.' });
+    }
 
     const result = await pool.query(
       `INSERT INTO matches (team1_id, team2_id, tournament_id, match_date, score_team1, score_team2, map, duration_minutes, winner_id, vod_url, notes)

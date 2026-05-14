@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const fetch = require('node-fetch');
 const { Pool } = require('pg');
+const authenticateToken = require('../middleware/auth');
+const { aiRateLimiter } = require('../middleware/rateLimiter');
 
 const pool = new Pool({
   host: process.env.DB_HOST,
@@ -11,16 +13,30 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD,
 });
 
+// Ensure ai_analyses table exists
+pool.query(`
+  CREATE TABLE IF NOT EXISTS ai_analyses (
+    id SERIAL PRIMARY KEY,
+    analysis_type VARCHAR(100),
+    entity_id INTEGER,
+    entity_type VARCHAR(50),
+    content TEXT,
+    model VARCHAR(100),
+    created_at TIMESTAMP DEFAULT NOW()
+  )
+`).catch(err => console.error('Failed to create ai_analyses table:', err.message));
+
 async function callOpenRouter(systemPrompt, userPrompt) {
+  const model = process.env.OPENROUTER_MODEL || 'anthropic/claude-3-5-sonnet-20241022';
   const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
       'Content-Type': 'application/json',
-      'HTTP-Referer': 'http://localhost:3000',
+      'HTTP-Referer': process.env.CLIENT_URL || 'http://localhost:3000',
     },
     body: JSON.stringify({
-      model: process.env.OPENROUTER_MODEL,
+      model,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },
@@ -36,8 +52,21 @@ async function callOpenRouter(systemPrompt, userPrompt) {
     throw new Error(data.error.message || 'OpenRouter API error');
   }
 
-  return data.choices[0].message.content;
+  return { content: data.choices[0].message.content, model };
 }
+
+async function persistAnalysis(analysisType, entityId, entityType, content, model) {
+  const result = await pool.query(
+    `INSERT INTO ai_analyses (analysis_type, entity_id, entity_type, content, model)
+     VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+    [analysisType, entityId, entityType, content, model]
+  );
+  return result.rows[0].id;
+}
+
+// Apply auth + rate limiter to all AI routes
+router.use(authenticateToken);
+router.use(aiRateLimiter);
 
 // POST /api/ai/performance-analysis
 router.post('/performance-analysis', async (req, res) => {
@@ -92,10 +121,12 @@ Please provide:
 8. **Personalized Recommendations** - 5 actionable steps to improve performance
 9. **Competitive Outlook** - How does this player stack up at the pro level?`;
 
-    const analysis = await callOpenRouter(systemPrompt, userPrompt);
+    const { content: analysis, model } = await callOpenRouter(systemPrompt, userPrompt);
+    const analysis_id = await persistAnalysis('performance_analysis', playerId, 'player', analysis, model);
 
     res.json({
       analysis,
+      analysis_id,
       player,
       generatedAt: new Date().toISOString(),
     });
@@ -124,7 +155,6 @@ router.post('/strategy-analysis', async (req, res) => {
     const team = teamResult.rows[0];
     const opponent = opponentResult.rows[0];
 
-    // Fetch recent matches for both teams
     const teamMatchesResult = await pool.query(
       `SELECT m.*, t1.name AS team1_name, t2.name AS team2_name, w.name AS winner_name
        FROM matches m
@@ -186,10 +216,12 @@ Please provide:
 9. **Win Conditions** - What needs to happen to win
 10. **Risk Assessment** - Potential pitfalls and how to avoid them`;
 
-    const analysis = await callOpenRouter(systemPrompt, userPrompt);
+    const { content: analysis, model } = await callOpenRouter(systemPrompt, userPrompt);
+    const analysis_id = await persistAnalysis('strategy_analysis', teamId, 'team', analysis, model);
 
     res.json({
       analysis,
+      analysis_id,
       team,
       opponent,
       generatedAt: new Date().toISOString(),
@@ -274,10 +306,12 @@ Please provide a full scouting report including:
 9. **Danger Zones** - When and where they are most dangerous
 10. **Recommended Counter-Strategy** - How to beat this team`;
 
-    const report = await callOpenRouter(systemPrompt, userPrompt);
+    const { content: report, model } = await callOpenRouter(systemPrompt, userPrompt);
+    const analysis_id = await persistAnalysis('opponent_scouting', teamId, 'team', report, model);
 
     res.json({
       report,
+      analysis_id,
       team,
       players,
       generatedAt: new Date().toISOString(),
@@ -357,10 +391,12 @@ Please create a detailed training plan including:
 9. **Progress Metrics** - How to measure improvement
 10. **Milestones & Goals** - Specific targets to hit during the plan`;
 
-    const plan = await callOpenRouter(systemPrompt, userPrompt);
+    const { content: plan, model } = await callOpenRouter(systemPrompt, userPrompt);
+    const analysis_id = await persistAnalysis('training_plan', playerId, 'player', plan, model);
 
     res.json({
       plan,
+      analysis_id,
       player,
       generatedAt: new Date().toISOString(),
     });
@@ -379,7 +415,6 @@ router.post('/match-prediction', async (req, res) => {
       return res.status(400).json({ error: 'team1Id and team2Id are required.' });
     }
 
-    // Fetch teams with rosters
     const team1Result = await pool.query('SELECT * FROM teams WHERE id = $1', [team1Id]);
     const team2Result = await pool.query('SELECT * FROM teams WHERE id = $1', [team2Id]);
 
@@ -473,10 +508,12 @@ Please provide:
 9. **Map/Draft Predictions** - Expected picks and bans
 10. **Viewer's Guide** - What to watch for as a spectator`;
 
-    const prediction = await callOpenRouter(systemPrompt, userPrompt);
+    const { content: prediction, model } = await callOpenRouter(systemPrompt, userPrompt);
+    const analysis_id = await persistAnalysis('match_prediction', team1Id, 'team', prediction, model);
 
     res.json({
       prediction,
+      analysis_id,
       team1,
       team2,
       generatedAt: new Date().toISOString(),
