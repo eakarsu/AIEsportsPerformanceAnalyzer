@@ -42,6 +42,14 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Custom Views (4 endpoints) — mounted BEFORE 404 / error handler
+app.use('/api/custom-views', require('./routes/customViews'));
+
+// 404 for unknown /api routes
+app.use('/api', (req, res) => {
+  res.status(404).json({ error: 'Not found', path: req.originalUrl });
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err.stack);

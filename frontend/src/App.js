@@ -28,6 +28,7 @@ import LiveStreamStatus from './pages/LiveStreamStatus';
 import BettingInsights from './pages/BettingInsights';
 
 import Batch03Features from './pages/Batch03Features';
+import CustomViewsPage from './pages/CustomViewsPage';
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem('token');
@@ -72,6 +73,7 @@ function App() {
         <Route path="/ai/sponsorship-match" element={<ProtectedRoute><SponsorshipMatch /></ProtectedRoute>} />
         <Route path="/ai/live-stream-status" element={<ProtectedRoute><LiveStreamStatus /></ProtectedRoute>} />
         <Route path="/ai/betting-insights" element={<ProtectedRoute><BettingInsights /></ProtectedRoute>} />
+        <Route path="/custom-views" element={<ProtectedRoute><CustomViewsPage /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>

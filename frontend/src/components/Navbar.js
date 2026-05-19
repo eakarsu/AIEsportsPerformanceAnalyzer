@@ -19,6 +19,7 @@ function Navbar() {
       </div>
       <div className="navbar-right">
         <button className="navbar-link" onClick={() => navigate('/')}>Dashboard</button>
+        <button className="navbar-link" data-testid="nav-esports-views" onClick={() => navigate('/custom-views')}>Esports Views</button>
         <span className="navbar-user">{user.email || 'User'}</span>
         <button className="navbar-logout" onClick={handleLogout}>Logout</button>
       </div>
