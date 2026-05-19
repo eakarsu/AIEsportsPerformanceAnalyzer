@@ -10,11 +10,26 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD,
 });
 
-// GET /api/teams - list all teams
+// GET /api/teams - list all teams (paginated)
 router.get('/', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM teams ORDER BY ranking ASC NULLS LAST');
-    res.json(result.rows);
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
+    const offset = (page - 1) * limit;
+
+    const [dataResult, countResult] = await Promise.all([
+      pool.query(
+        'SELECT * FROM teams ORDER BY ranking ASC NULLS LAST LIMIT $1 OFFSET $2',
+        [limit, offset]
+      ),
+      pool.query('SELECT COUNT(*) FROM teams'),
+    ]);
+
+    const total = parseInt(countResult.rows[0].count);
+    res.json({
+      data: dataResult.rows,
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+    });
   } catch (err) {
     console.error('Get teams error:', err);
     res.status(500).json({ error: 'Internal server error.' });
@@ -52,6 +67,10 @@ router.post('/', async (req, res) => {
       name, game, region, ranking, wins, losses,
       coach, founded_year, logo_url, description,
     } = req.body;
+
+    if (!name || !game) {
+      return res.status(400).json({ error: 'name and game are required.' });
+    }
 
     const result = await pool.query(
       `INSERT INTO teams (name, game, region, ranking, wins, losses, coach, founded_year, logo_url, description)

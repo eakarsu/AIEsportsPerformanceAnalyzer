@@ -10,11 +10,26 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD,
 });
 
-// GET /api/tournaments - list all tournaments
+// GET /api/tournaments - list all tournaments (paginated)
 router.get('/', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM tournaments ORDER BY start_date DESC');
-    res.json(result.rows);
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
+    const offset = (page - 1) * limit;
+
+    const [dataResult, countResult] = await Promise.all([
+      pool.query(
+        'SELECT * FROM tournaments ORDER BY start_date DESC LIMIT $1 OFFSET $2',
+        [limit, offset]
+      ),
+      pool.query('SELECT COUNT(*) FROM tournaments'),
+    ]);
+
+    const total = parseInt(countResult.rows[0].count);
+    res.json({
+      data: dataResult.rows,
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+    });
   } catch (err) {
     console.error('Get tournaments error:', err);
     res.status(500).json({ error: 'Internal server error.' });

@@ -18,6 +18,17 @@ import StrategyAnalysis from './pages/StrategyAnalysis';
 import OpponentScouting from './pages/OpponentScouting';
 import TrainingPlanGenerator from './pages/TrainingPlanGenerator';
 import MatchPrediction from './pages/MatchPrediction';
+import HighlightClipSuggest from './pages/HighlightClipSuggest';
+import WellnessLog from './pages/WellnessLog';
+import TournamentBrief from './pages/TournamentBrief';
+import MetaAnalysis from './pages/MetaAnalysis';
+import InjuryRiskAssess from './pages/InjuryRiskAssess';
+import SponsorshipMatch from './pages/SponsorshipMatch';
+import LiveStreamStatus from './pages/LiveStreamStatus';
+import BettingInsights from './pages/BettingInsights';
+
+import Batch03Features from './pages/Batch03Features';
+import CustomViewsPage from './pages/CustomViewsPage';
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem('token');
@@ -36,6 +47,7 @@ function App() {
   return (
     <Router>
       <Routes>
+          <Route path="/batch03" element={<Batch03Features />} />
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/players" element={<ProtectedRoute><Players /></ProtectedRoute>} />
@@ -53,6 +65,15 @@ function App() {
         <Route path="/ai/scouting" element={<ProtectedRoute><OpponentScouting /></ProtectedRoute>} />
         <Route path="/ai/training-plan" element={<ProtectedRoute><TrainingPlanGenerator /></ProtectedRoute>} />
         <Route path="/ai/prediction" element={<ProtectedRoute><MatchPrediction /></ProtectedRoute>} />
+        <Route path="/ai/highlight-clip-suggest" element={<ProtectedRoute><HighlightClipSuggest /></ProtectedRoute>} />
+        <Route path="/ai/wellness-log" element={<ProtectedRoute><WellnessLog /></ProtectedRoute>} />
+        <Route path="/ai/tournament-brief" element={<ProtectedRoute><TournamentBrief /></ProtectedRoute>} />
+        <Route path="/ai/meta-analysis" element={<ProtectedRoute><MetaAnalysis /></ProtectedRoute>} />
+        <Route path="/ai/injury-risk-assess" element={<ProtectedRoute><InjuryRiskAssess /></ProtectedRoute>} />
+        <Route path="/ai/sponsorship-match" element={<ProtectedRoute><SponsorshipMatch /></ProtectedRoute>} />
+        <Route path="/ai/live-stream-status" element={<ProtectedRoute><LiveStreamStatus /></ProtectedRoute>} />
+        <Route path="/ai/betting-insights" element={<ProtectedRoute><BettingInsights /></ProtectedRoute>} />
+        <Route path="/custom-views" element={<ProtectedRoute><CustomViewsPage /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
