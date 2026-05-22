@@ -29,6 +29,12 @@ import BettingInsights from './pages/BettingInsights';
 
 import Batch03Features from './pages/Batch03Features';
 import CustomViewsPage from './pages/CustomViewsPage';
+import ScrimTiltRecovery from './pages/ScrimTiltRecovery';
+
+import CodexCustomVizFeature from './pages/CodexCustomVizFeature';
+import CodexOperationsFeature from './pages/CodexOperationsFeature';
+
+import TimelineView from './pages/TimelineView';
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem('token');
@@ -47,6 +53,10 @@ function App() {
   return (
     <Router>
       <Routes>
+        <Route path="/insights/timeline" element={<ProtectedRoute><TimelineView /></ProtectedRoute>} />
+        <Route path="/codex/custom-viz" element={<ProtectedRoute><CodexCustomVizFeature /></ProtectedRoute>} />
+        <Route path="/codex/operations" element={<ProtectedRoute><CodexOperationsFeature /></ProtectedRoute>} />
+
           <Route path="/batch03" element={<Batch03Features />} />
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
@@ -74,6 +84,7 @@ function App() {
         <Route path="/ai/live-stream-status" element={<ProtectedRoute><LiveStreamStatus /></ProtectedRoute>} />
         <Route path="/ai/betting-insights" element={<ProtectedRoute><BettingInsights /></ProtectedRoute>} />
         <Route path="/custom-views" element={<ProtectedRoute><CustomViewsPage /></ProtectedRoute>} />
+        <Route path="/scrim-tilt-recovery" element={<ProtectedRoute><ScrimTiltRecovery /></ProtectedRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>

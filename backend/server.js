@@ -36,6 +36,7 @@ app.use('/api/burnout-prevention', require('./routes/burnoutPrevention'));
 app.use('/api/sponsorship-match', require('./routes/sponsorshipMatch'));
 app.use('/api/betting-insights', require('./routes/bettingInsights'));
 app.use('/api/content-creation', require('./routes/contentCreation'));
+app.use('/api/scrim-tilt-recovery', require('./routes/scrimTiltRecovery'));
 
 // Health check
 app.get('/api/health', (req, res) => {
