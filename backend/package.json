@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "db:init": "psql -h localhost -U postgres -d esports_analyzer -f db/schema.sql && psql -h localhost -U postgres -d esports_analyzer -f db/seed.sql"
+    "create-admin": "node scripts/create-admin.js",
+    "db:init": "psql -h localhost -U postgres -d esports_analyzer -f db/schema.sql && psql -h localhost -U postgres -d esports_analyzer -f db/seed.sql",
+    "test": "node --test tests/*.test.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

@@ -1,6 +1,10 @@
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
+if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
+  throw new Error('JWT_SECRET must be configured with at least 32 characters');
+}
+
 const express = require('express');
 const cors = require('cors');
 
@@ -37,6 +41,7 @@ app.use('/api/sponsorship-match', require('./routes/sponsorshipMatch'));
 app.use('/api/betting-insights', require('./routes/bettingInsights'));
 app.use('/api/content-creation', require('./routes/contentCreation'));
 app.use('/api/scrim-tilt-recovery', require('./routes/scrimTiltRecovery'));
+app.use('/api/governed-coaching', require('./routes/governedCoaching'));
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -57,13 +62,6 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal server error', message: err.message });
 });
 
-
-// === Batch 03 Gaps & Frontend Mounts ===
-try {
-  const _batch03 = require('./routes/batch03Gaps');
-  if (typeof authenticateToken === 'function') app.use('/api', authenticateToken, _batch03);
-  else app.use('/api', _batch03);
-} catch (_e) { /* batch03 gap routes optional */ }
 
 app.listen(PORT, () => {
   console.log(`Backend server running on http://localhost:${PORT}`);
