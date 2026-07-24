@@ -14,12 +14,15 @@ const pool = new Pool(process.env.DATABASE_URL
     });
 
 async function main() {
+  if (process.env.ALLOW_SCHEMA_MIGRATION !== 'true') {
+    throw new Error('ALLOW_SCHEMA_MIGRATION=true is required');
+  }
   if (process.env.BOOTSTRAP_ACKNOWLEDGEMENT !== 'create-initial-admin') {
     throw new Error('Explicit bootstrap acknowledgement is required');
   }
   const email = (process.env.PROVISION_ADMIN_EMAIL || '').trim().toLowerCase();
   const password = process.env.PROVISION_ADMIN_PASSWORD || '';
-  const name = (process.env.PROVISION_ADMIN_NAME || '').trim();
+  const name = (process.env.PROVISION_ADMIN_NAME || 'Runtime Administrator').trim();
   if (!email || !name || password.length < 12) {
     throw new Error('Admin email, name, and a 12+ character password are required');
   }

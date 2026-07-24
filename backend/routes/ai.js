@@ -27,8 +27,14 @@ pool.query(`
 `).catch(err => console.error('Failed to create ai_analyses table:', err.message));
 
 async function callOpenRouter(systemPrompt, userPrompt) {
+  if (!process.env.OPENROUTER_API_KEY) {
+    const err = new Error('OPENROUTER_API_KEY is not configured on the server.');
+    err.statusCode = 503;
+    throw err;
+  }
   const model = process.env.OPENROUTER_MODEL || 'anthropic/claude-3-5-sonnet-20241022';
-  const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+  const baseUrl = (process.env.OPENROUTER_BASE_URL || 'https://openrouter.ai/api/v1').replace(/\/$/, '');
+  const response = await fetch(`${baseUrl}/chat/completions`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
@@ -52,7 +58,9 @@ async function callOpenRouter(systemPrompt, userPrompt) {
     throw new Error(data.error.message || 'OpenRouter API error');
   }
 
-  return { content: data.choices[0].message.content, model };
+  const content = data.choices?.[0]?.message?.content;
+  if (!content) throw new Error('OpenRouter returned an empty response');
+  return { content, model };
 }
 
 async function persistAnalysis(analysisType, entityId, entityType, content, model) {
