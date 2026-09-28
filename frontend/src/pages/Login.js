@@ -74,7 +74,7 @@ function Login() {
         </form>
 
         <button className="quick-login-btn" type="button" onClick={handleQuickLogin}>
-          Quick Login (Demo Account)
+          Auto Fill Demo Credentials
         </button>
       </div>
     </div>
