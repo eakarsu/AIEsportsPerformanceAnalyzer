@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
+import AppSidebar from './components/AppSidebar';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Players from './pages/Players';
@@ -42,10 +43,10 @@ function ProtectedRoute({ children }) {
     return <Navigate to="/login" replace />;
   }
   return (
-    <>
-      <Navbar />
-      <div className="main-content">{children}</div>
-    </>
+    <div className="codex-nav-shell">
+      <AppSidebar />
+      <div className="codex-protected-main"><Navbar /><div className="main-content">{children}</div></div>
+    </div>
   );
 }
 
