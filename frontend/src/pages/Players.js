@@ -1,6 +1,8 @@
+import { listData } from '../listData';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import RecordDialog from '../components/RecordDialog';
 
 const GAME_OPTIONS = [
   'League of Legends',
@@ -27,6 +29,7 @@ const initialForm = {
 
 function Players() {
   const navigate = useNavigate();
+  const [detail, setDetail] = useState(null);
   const [players, setPlayers] = useState([]);
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -42,7 +45,7 @@ function Players() {
       setLoading(true);
       setError(null);
       const res = await axios.get('/api/players', { headers });
-      setPlayers(Array.isArray(res.data) ? res.data : []);
+      setPlayers(listData(res.data));
     } catch (err) {
       setError('Failed to load players. Please try again.');
       console.error(err);
@@ -54,7 +57,7 @@ function Players() {
   const fetchTeams = async () => {
     try {
       const res = await axios.get('/api/teams', { headers });
-      setTeams(Array.isArray(res.data) ? res.data : []);
+      setTeams(listData(res.data));
     } catch (err) {
       console.error('Failed to fetch teams:', err);
     }
@@ -146,7 +149,7 @@ function Players() {
             <tr
               key={player.id}
               className="clickable-row"
-              onClick={() => navigate(`/players/${player.id}`)}
+              onClick={() => setDetail(player)}
             >
               <td>{player.username}</td>
               <td>{player.real_name || '—'}</td>
@@ -310,6 +313,22 @@ function Players() {
             </form>
           </div>
         </div>
+      )}
+
+      {detail && (
+        <RecordDialog
+          item={detail}
+          title="Player details"
+          onClose={() => setDetail(null)}
+          onEdit={(row) => navigate(`/players/${row.id}`)}
+          onDelete={async (row) => {
+            try {
+              await axios.delete(`/api/players/${row.id}`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
+              fetchPlayers();
+            } catch (e) { /* keep the dialog usable on error */ }
+            setDetail(null);
+          }}
+        />
       )}
     </div>
   );

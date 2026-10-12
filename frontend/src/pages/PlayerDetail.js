@@ -1,3 +1,4 @@
+import { listData } from '../listData';
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
@@ -69,7 +70,7 @@ function PlayerDetail() {
   const fetchTeams = async () => {
     try {
       const res = await axios.get('/api/teams', { headers });
-      setTeams(Array.isArray(res.data) ? res.data : []);
+      setTeams(listData(res.data));
     } catch (err) {
       console.error('Failed to fetch teams:', err);
     }

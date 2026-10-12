@@ -1,3 +1,7 @@
+import { listData } from '../listData';
+import AIAnalysisHistory from '../components/AIAnalysisHistory';
+import AIPresetButtons from '../components/AIPresetButtons';
+import FormattedAIReport from '../components/FormattedAIReport';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
@@ -15,7 +19,7 @@ function HighlightClipSuggest() {
     const fetchMatches = async () => {
       try {
         const response = await axios.get('/api/matches', { headers: headers() });
-        setMatches(Array.isArray(response.data) ? response.data : []);
+        setMatches(listData(response.data));
       } catch (err) {
         console.error('Failed to fetch matches:', err);
       }
@@ -48,9 +52,6 @@ function HighlightClipSuggest() {
     }
   };
 
-  const clips = result?.suggestions?.clips || [];
-  const storyline = result?.suggestions?.overall_storyline;
-
   return (
     <div className="ai-page">
       <div className="page-header">
@@ -58,6 +59,7 @@ function HighlightClipSuggest() {
         <p>AI-suggested highlight moments from match notes and key events</p>
       </div>
 
+      <AIPresetButtons prerequisite={"Load at least 2 real matches to use all samples."} presets={[{ label: 'Short highlight list', disabled: matches.length < 1, fill: () => { setMatchId(String(matches[0].id)); setMaxClips(5); } }, { label: 'Full highlight list', disabled: matches.length < 2, fill: () => { setMatchId(String(matches[1].id)); setMaxClips(12); } }]} />
       <div className="ai-controls">
         <div className="form-group">
           <label htmlFor="match-select">Match</label>
@@ -121,41 +123,11 @@ function HighlightClipSuggest() {
                 </span>
               )}
             </div>
-            <div className="ai-result-body">
-              {storyline && (
-                <>
-                  <h3>Overall Storyline</h3>
-                  <p>{storyline}</p>
-                </>
-              )}
-              {clips.length > 0 ? (
-                <>
-                  <h3>Suggested Clips ({clips.length})</h3>
-                  <ul>
-                    {clips.map((clip, idx) => (
-                      <li key={idx} style={{ marginBottom: '12px' }}>
-                        <strong>
-                          #{clip.rank ?? idx + 1} — {clip.timestamp_estimate || 'time TBD'}
-                        </strong>
-                        {clip.title ? `: ${clip.title}` : ''}
-                        {clip.type ? <em> [{clip.type}]</em> : null}
-                        {Array.isArray(clip.players_involved) && clip.players_involved.length > 0 && (
-                          <div>Players: {clip.players_involved.join(', ')}</div>
-                        )}
-                        {clip.reason && <div>Why: {clip.reason}</div>}
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              ) : (
-                result.suggestions?.raw && (
-                  <pre style={{ whiteSpace: 'pre-wrap' }}>{result.suggestions.raw}</pre>
-                )
-              )}
-            </div>
+            <div className="ai-result-body"><FormattedAIReport response={result} title="Suggested highlights" /></div>
           </div>
         </div>
       )}
+      <AIAnalysisHistory entityType="match" entityId={matchId} />
     </div>
   );
 }

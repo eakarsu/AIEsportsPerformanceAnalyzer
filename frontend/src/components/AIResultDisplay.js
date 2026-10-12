@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactMarkdown from 'react-markdown';
+import FormattedAIReport from './FormattedAIReport';
 
 function AIResultDisplay({ result, loading, error }) {
   if (loading) {
@@ -16,31 +16,9 @@ function AIResultDisplay({ result, loading, error }) {
     return <div className="error-message">{error}</div>;
   }
 
-  if (!result) return null;
+  if (result === null || result === undefined) return null;
 
-  // Extract the text content from the result (could be analysis, report, plan, or prediction)
-  const textContent = result.analysis || result.report || result.plan || result.prediction || '';
-
-  return (
-    <div className="ai-result-wrapper">
-      <div className="ai-result-card">
-        <div className="ai-result-header">
-          <div className="ai-badge">
-            <div className="ai-badge-dot"></div>
-            AI Generated Analysis
-          </div>
-          {result.generatedAt && (
-            <span className="ai-result-timestamp">
-              Generated: {new Date(result.generatedAt).toLocaleString()}
-            </span>
-          )}
-        </div>
-        <div className="ai-result-body">
-          <ReactMarkdown>{textContent}</ReactMarkdown>
-        </div>
-      </div>
-    </div>
-  );
+  return <div className="ai-result-wrapper"><FormattedAIReport response={result} title="AI generated analysis" /></div>;
 }
 
 export default AIResultDisplay;

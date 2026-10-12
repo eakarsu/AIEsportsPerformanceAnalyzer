@@ -1,3 +1,4 @@
+import { listData } from '../listData';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
@@ -23,7 +24,7 @@ function MetaRulesEditor() {
     setLoading(true);
     axios
       .get('/api/custom-views/meta-rules')
-      .then((r) => setRules(r.data?.data || []))
+      .then((r) => setRules(listData(r.data)))
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
   };

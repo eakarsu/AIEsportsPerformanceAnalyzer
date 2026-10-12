@@ -1,3 +1,4 @@
+import FormattedAIReport from '../components/FormattedAIReport';
 // === Batch 03 Gaps & Frontend Mounts ===
 // Auto-generated frontend page (lean v0). Wires Custom Feature Suggestions
 // and Gap endpoints (AI counterparts + non-AI features) to backend routes.
@@ -41,15 +42,15 @@ export default function Batch03Features() {
   const sampleRequests = [
       {
           "label": "Scenario",
-          "value": "Run Batch03 Features for a realistic customer case.\nContext: a team needs a practical recommendation based on incomplete operating data.\nGoal: identify the best action, key risks, missing information, and expected business impact.\nReturn: summary, prioritized action plan, assumptions, and follow-up questions."
+          "value": "Analyze a Valorant team's loss to repeated fast B-site executes. The roster has three recent scrims, incomplete VOD tags, and a tournament match in five days. Return a practice plan, tactical risks, assumptions, and evidence gaps."
       },
       {
           "label": "Data sample",
-          "value": "Analyze this Batch03 Features data sample.\nInput records:\n- Record 1: urgent, customer impact high, owner unassigned\n- Record 2: medium priority, blocked by missing data\n- Record 3: recurring issue, automation opportunity\nReturn structured findings, anomalies, recommendations, and confidence."
+          "value": "Analyze these CS2 scrim notes: Mirage 8-13, lost 6 of 8 T-side gun rounds; Inferno 13-10, won 5 of 7 retakes; opponent repeatedly saved utility for late B hits. Return structured findings, anomalies, recommendations, and confidence."
       },
       {
           "label": "Executive review",
-          "value": "Prepare an executive review for Batch03 Features.\nAudience: business owner, operations lead, and implementation team.\nInclude impact, risk, estimated effort, decision points, and a concise next-step plan."
+          "value": "Prepare a coach's review before a League of Legends playoff series. Audience: head coach, analyst, and players. Cover draft priorities, practice effort, matchup risk, decision points, and a concise match-day plan."
       }
   ];
 
@@ -124,9 +125,7 @@ export default function Batch03Features() {
           </div>
           {error && (<div style={{ marginTop: 12, padding: 10, background: '#fee2e2', color: '#991b1b', borderRadius: 4, fontSize: 13 }}>{error}</div>)}
           {results[current.slug] && (
-            <pre style={{ marginTop: 12, padding: 10, background: '#0b1020', color: '#cbd5e1', borderRadius: 4, overflow: 'auto', maxHeight: 360, fontSize: 12 }}>
-              {typeof results[current.slug] === 'string' ? results[current.slug] : JSON.stringify(results[current.slug], null, 2)}
-            </pre>
+            <FormattedAIReport response={results[current.slug]} title={current.label} />
           )}
         </div>
       )}

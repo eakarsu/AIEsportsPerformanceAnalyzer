@@ -1,3 +1,4 @@
+import { listCount } from '../listData';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -94,11 +95,11 @@ function Dashboard() {
         ]);
 
         setCounts({
-          players: Array.isArray(players.data) ? players.data.length : 0,
-          teams: Array.isArray(teams.data) ? teams.data.length : 0,
-          matches: Array.isArray(matches.data) ? matches.data.length : 0,
-          tournaments: Array.isArray(tournaments.data) ? tournaments.data.length : 0,
-          training: Array.isArray(training.data) ? training.data.length : 0,
+          players: listCount(players.data),
+          teams: listCount(teams.data),
+          matches: listCount(matches.data),
+          tournaments: listCount(tournaments.data),
+          training: listCount(training.data),
         });
       } catch (err) {
         console.error('Failed to fetch dashboard counts:', err);

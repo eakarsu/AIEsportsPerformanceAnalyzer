@@ -1,3 +1,7 @@
+import { listData } from '../listData';
+import AIAnalysisHistory from '../components/AIAnalysisHistory';
+import FormattedAIReport from '../components/FormattedAIReport';
+import AIPresetButtons from '../components/AIPresetButtons';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
@@ -15,7 +19,7 @@ function TournamentBrief() {
     const fetchTournaments = async () => {
       try {
         const response = await axios.get('/api/tournaments', { headers: headers() });
-        setTournaments(Array.isArray(response.data) ? response.data : []);
+        setTournaments(listData(response.data));
       } catch (err) {
         console.error('Failed to fetch tournaments:', err);
       }
@@ -57,6 +61,7 @@ function TournamentBrief() {
         <p>AI-generated round-by-round tournament brief.</p>
       </div>
 
+      <AIPresetButtons prerequisite={"Load at least 2 real tournaments to use all samples."} presets={[{ label: 'Group stage', disabled: tournaments.length < 1, fill: () => { setTournamentId(String(tournaments[0].id)); setRound("group stage"); } }, { label: 'Quarterfinals', disabled: tournaments.length < 2, fill: () => { setTournamentId(String(tournaments[1].id)); setRound("quarterfinals"); } }]} />
       <div className="ai-controls">
         <div className="form-group">
           <label htmlFor="tournament-select">Tournament</label>
@@ -118,13 +123,12 @@ function TournamentBrief() {
               )}
             </div>
             <div className="ai-result-body">
-              <pre style={{ whiteSpace: 'pre-wrap' }}>
-                {typeof result === 'string' ? result : JSON.stringify(result, null, 2)}
-              </pre>
+              <FormattedAIReport response={result} />
             </div>
           </div>
         </div>
       )}
+      <AIAnalysisHistory entityType="tournament" entityId={tournamentId} />
     </div>
   );
 }

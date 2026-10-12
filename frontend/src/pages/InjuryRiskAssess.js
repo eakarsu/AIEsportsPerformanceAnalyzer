@@ -1,3 +1,7 @@
+import { listData } from '../listData';
+import AIAnalysisHistory from '../components/AIAnalysisHistory';
+import FormattedAIReport from '../components/FormattedAIReport';
+import AIPresetButtons from '../components/AIPresetButtons';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
@@ -15,7 +19,7 @@ function InjuryRiskAssess() {
     const fetchPlayers = async () => {
       try {
         const response = await axios.get('/api/players', { headers: headers() });
-        setPlayers(Array.isArray(response.data) ? response.data : []);
+        setPlayers(listData(response.data));
       } catch (err) {
         console.error('Failed to fetch players:', err);
       }
@@ -60,6 +64,7 @@ function InjuryRiskAssess() {
         <p>Estimate overtraining and burnout risk from recent wellness logs.</p>
       </div>
 
+      <AIPresetButtons prerequisite={"Load at least 2 real players to use all samples."} presets={[{ label: 'Recent load', disabled: players.length < 1, fill: () => { setPlayerId(String(players[0].id)); setLookbackDays(14); } }, { label: 'Longer trend', disabled: players.length < 2, fill: () => { setPlayerId(String(players[1].id)); setLookbackDays(30); } }]} />
       <div className="ai-controls">
         <div className="form-group">
           <label htmlFor="ira-player">Player</label>
@@ -123,13 +128,12 @@ function InjuryRiskAssess() {
               )}
             </div>
             <div className="ai-result-body">
-              <pre style={{ whiteSpace: 'pre-wrap' }}>
-                {result.assessment || JSON.stringify(result, null, 2)}
-              </pre>
+              <FormattedAIReport response={result} />
             </div>
           </div>
         </div>
       )}
+      <AIAnalysisHistory entityType="player" entityId={playerId} />
     </div>
   );
 }

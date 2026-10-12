@@ -1,3 +1,6 @@
+import { listData } from '../listData';
+import AIAnalysisHistory from '../components/AIAnalysisHistory';
+import AIPresetButtons from '../components/AIPresetButtons';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -37,7 +40,7 @@ function TrainingPlanGenerator() {
     const fetchPlayers = async () => {
       try {
         const response = await axios.get('/api/players', { headers });
-        setPlayers(response.data);
+        setPlayers(listData(response.data));
       } catch (err) {
         console.error('Failed to fetch players:', err);
       }
@@ -79,6 +82,7 @@ function TrainingPlanGenerator() {
         <p>AI-personalized training programs</p>
       </div>
 
+      <AIPresetButtons prerequisite={"Load at least 2 real players to use all samples."} presets={[{ label: 'Aim and positioning', disabled: players.length < 1, fill: () => { setSelectedPlayer(String(players[0].id)); setFocusAreas(["Aim Training", "Positioning"]); setDuration("2 Weeks"); } }, { label: 'Team play', disabled: players.length < 2, fill: () => { setSelectedPlayer(String(players[1].id)); setFocusAreas(["Team Communication", "VOD Review"]); setDuration("1 Month"); } }]} />
       <div className="ai-controls">
         <div className="form-group">
           <label htmlFor="player-select">Select Player</label>
@@ -89,7 +93,7 @@ function TrainingPlanGenerator() {
           >
             <option value="">-- Select a Player --</option>
             {players.map((player) => (
-              <option key={player._id} value={player._id}>
+              <option key={player.id} value={player.id}>
                 {player.name}
               </option>
             ))}
@@ -141,6 +145,7 @@ function TrainingPlanGenerator() {
       </div>
 
       <AIResultDisplay result={result} loading={loading} error={error} />
+      <AIAnalysisHistory entityType="player" entityId={selectedPlayer} />
     </div>
   );
 }

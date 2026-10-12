@@ -1,3 +1,4 @@
+import { listData } from '../listData';
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
@@ -36,7 +37,7 @@ function TrainingDetail() {
         axios.get('/api/players', { headers: headers() }),
       ]);
       setTraining(trainingRes.data);
-      setPlayers(Array.isArray(playersRes.data) ? playersRes.data : []);
+      setPlayers(listData(playersRes.data));
       setForm({
         title: trainingRes.data.title || '',
         player_id: trainingRes.data.player_id || '',

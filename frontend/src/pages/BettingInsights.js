@@ -1,7 +1,12 @@
-import React, { useState } from 'react';
+import { listData } from '../listData';
+import AIAnalysisHistory from '../components/AIAnalysisHistory';
+import FormattedAIReport from '../components/FormattedAIReport';
+import AIPresetButtons from '../components/AIPresetButtons';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 function BettingInsights() {
+  const [matches, setMatches] = useState([]);
   const [matchId, setMatchId] = useState('');
   const [market, setMarket] = useState('match-winner');
   const [result, setResult] = useState(null);
@@ -9,6 +14,9 @@ function BettingInsights() {
   const [error, setError] = useState(null);
 
   const headers = () => ({ Authorization: `Bearer ${localStorage.getItem('token')}` });
+  useEffect(() => { axios.get('/api/matches', { headers: headers() })
+    .then(({ data }) => setMatches(listData(data)))
+    .catch(() => setMatches([])); }, []);
 
   const handleSubmit = async () => {
     if (!matchId) return;
@@ -46,6 +54,10 @@ function BettingInsights() {
         Disclaimer: This page is for INFORMATIONAL analysis only. It does not provide odds, does not recommend a sportsbook, and does not recommend wagers. Esports betting may be regulated or prohibited in your jurisdiction.
       </div>
 
+      <AIPresetButtons prerequisite="Load real matches to use these samples." presets={[
+        { label: 'Match winner', disabled: matches.length < 1, fill: () => { setMatchId(String(matches[0].id)); setMarket('match-winner'); } },
+        { label: 'Total maps', disabled: matches.length < 2, fill: () => { setMatchId(String(matches[1].id)); setMarket('total-maps'); } },
+      ]} />
       <div className="ai-controls">
         <div className="form-group">
           <label htmlFor="bi-match">Match ID</label>
@@ -70,9 +82,7 @@ function BettingInsights() {
         <div className="ai-result-wrapper">
           <div className="ai-result-card">
             <div className="ai-result-body">
-              <pre style={{ whiteSpace: 'pre-wrap' }}>
-                {result.analysis || JSON.stringify(result, null, 2)}
-              </pre>
+              <FormattedAIReport response={result} />
               {result.disclaimer && (
                 <div style={{ marginTop: '12px', fontSize: '0.85em', color: '#856404' }}>{result.disclaimer}</div>
               )}
@@ -80,6 +90,7 @@ function BettingInsights() {
           </div>
         </div>
       )}
+      <AIAnalysisHistory entityType="match" entityId={matchId} />
     </div>
   );
 }

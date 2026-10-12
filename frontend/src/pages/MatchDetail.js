@@ -1,3 +1,4 @@
+import { listData } from '../listData';
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
@@ -27,8 +28,8 @@ function MatchDetail() {
         axios.get('/api/tournaments', { headers: headers() }),
       ]);
       setMatch(matchRes.data);
-      setTeams(Array.isArray(teamsRes.data) ? teamsRes.data : []);
-      setTournaments(Array.isArray(tournamentsRes.data) ? tournamentsRes.data : []);
+      setTeams(listData(teamsRes.data));
+      setTournaments(listData(tournamentsRes.data));
       setForm({
         team1_id: matchRes.data.team1_id || '',
         team2_id: matchRes.data.team2_id || '',

@@ -1,3 +1,4 @@
+import { listData } from '../listData';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
@@ -23,7 +24,7 @@ function MapPerformanceHeatmap() {
     const url = '/api/custom-views/map-performance-heatmap' + (game ? `?game=${encodeURIComponent(game)}` : '');
     axios
       .get(url)
-      .then((r) => !cancelled && setPayload(r.data))
+      .then((r) => !cancelled && setPayload({ ...r.data, maps: listData(r.data?.maps), players: listData(r.data?.players).map((player) => ({ ...player, cells: listData(player.cells) })) }))
       .catch((e) => !cancelled && setError(e.message))
       .finally(() => !cancelled && setLoading(false));
     return () => {

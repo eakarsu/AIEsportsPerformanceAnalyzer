@@ -1,3 +1,6 @@
+import { listData } from '../listData';
+import AIAnalysisHistory from '../components/AIAnalysisHistory';
+import AIPresetButtons from '../components/AIPresetButtons';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -17,7 +20,7 @@ function OpponentScouting() {
     const fetchTeams = async () => {
       try {
         const response = await axios.get('/api/teams', { headers });
-        setTeams(response.data);
+        setTeams(listData(response.data));
       } catch (err) {
         console.error('Failed to fetch teams:', err);
       }
@@ -53,6 +56,7 @@ function OpponentScouting() {
         <p>AI-generated comprehensive scouting reports</p>
       </div>
 
+      <AIPresetButtons prerequisite={"Load at least 2 real teams to use all samples."} presets={[{ label: 'Opening opponent', disabled: teams.length < 1, fill: () => { setTeamId(String(teams[0].id)); } }, { label: 'Second opponent', disabled: teams.length < 2, fill: () => { setTeamId(String(teams[1].id)); } }]} />
       <div className="ai-controls">
         <div className="form-group">
           <label htmlFor="team-select">Select Team to Scout</label>
@@ -63,7 +67,7 @@ function OpponentScouting() {
           >
             <option value="">-- Select a Team --</option>
             {teams.map((team) => (
-              <option key={team._id} value={team._id}>
+              <option key={team.id} value={team.id}>
                 {team.name}
               </option>
             ))}
@@ -80,6 +84,7 @@ function OpponentScouting() {
       </div>
 
       <AIResultDisplay result={result} loading={loading} error={error} />
+      <AIAnalysisHistory entityType="team" entityId={teamId} />
     </div>
   );
 }

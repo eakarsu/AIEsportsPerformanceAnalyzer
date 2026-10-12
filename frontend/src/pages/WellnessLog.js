@@ -1,3 +1,7 @@
+import { listData } from '../listData';
+import AIAnalysisHistory from '../components/AIAnalysisHistory';
+import FormattedAIReport from '../components/FormattedAIReport';
+import AIPresetButtons from '../components/AIPresetButtons';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
@@ -17,7 +21,7 @@ function WellnessLog() {
     const fetchPlayers = async () => {
       try {
         const response = await axios.get('/api/players', { headers: headers() });
-        setPlayers(Array.isArray(response.data) ? response.data : []);
+        setPlayers(listData(response.data));
       } catch (err) {
         console.error('Failed to fetch players:', err);
       }
@@ -64,6 +68,7 @@ function WellnessLog() {
         <p>Log player wellness data and get AI burnout / overtraining risk insight.</p>
       </div>
 
+      <AIPresetButtons prerequisite={"Load at least 2 real players to use all samples."} presets={[{ label: 'Rested player', disabled: players.length < 1, fill: () => { setPlayerId(String(players[0].id)); setSleepHours(8); setStressLevel(3); setMood("good"); } }, { label: 'Heavy practice week', disabled: players.length < 2, fill: () => { setPlayerId(String(players[1].id)); setSleepHours(5.5); setStressLevel(8); setMood("tired"); } }]} />
       <div className="ai-controls">
         <div className="form-group">
           <label htmlFor="player-select">Player</label>
@@ -152,13 +157,12 @@ function WellnessLog() {
               )}
             </div>
             <div className="ai-result-body">
-              <pre style={{ whiteSpace: 'pre-wrap' }}>
-                {typeof result === 'string' ? result : JSON.stringify(result, null, 2)}
-              </pre>
+              <FormattedAIReport response={result} />
             </div>
           </div>
         </div>
       )}
+      <AIAnalysisHistory entityType="player" entityId={playerId} />
     </div>
   );
 }

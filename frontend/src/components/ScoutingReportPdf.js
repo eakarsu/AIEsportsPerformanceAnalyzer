@@ -1,3 +1,4 @@
+import { listData } from '../listData';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
@@ -10,8 +11,7 @@ function ScoutingReportPdf() {
 
   useEffect(() => {
     axios.get('/api/teams?limit=100').then((r) => {
-      const list = r.data?.data || r.data || [];
-      setTeams(Array.isArray(list) ? list : []);
+      setTeams(listData(r.data));
     }).catch(() => setTeams([]));
   }, []);
 
@@ -21,7 +21,7 @@ function ScoutingReportPdf() {
     const url = '/api/custom-views/scouting-report' + (id ? `?team_id=${id}` : '');
     axios
       .get(url)
-      .then((r) => setReport(r.data))
+      .then((r) => setReport({ ...r.data, roster: listData(r.data?.roster), recent_matches: listData(r.data?.recent_matches) }))
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
   };

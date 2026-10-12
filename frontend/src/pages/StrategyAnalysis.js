@@ -1,3 +1,6 @@
+import { listData } from '../listData';
+import AIAnalysisHistory from '../components/AIAnalysisHistory';
+import AIPresetButtons from '../components/AIPresetButtons';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -19,7 +22,7 @@ function StrategyAnalysis() {
     const fetchTeams = async () => {
       try {
         const response = await axios.get('/api/teams', { headers });
-        setTeams(response.data);
+        setTeams(listData(response.data));
       } catch (err) {
         console.error('Failed to fetch teams:', err);
       }
@@ -55,6 +58,7 @@ function StrategyAnalysis() {
         <p>AI strategic insights and tactical recommendations</p>
       </div>
 
+      <AIPresetButtons prerequisite={"Load at least 2 real teams to use all samples."} presets={[{ label: 'Valorant preparation', disabled: teams.length < 2, fill: () => { setTeamId(String(teams[0].id)); setOpponentTeamId(String(teams[1].id)); setGame("Valorant"); } }, { label: 'CS2 preparation', disabled: teams.length < 2, fill: () => { setTeamId(String(teams[1].id)); setOpponentTeamId(String(teams[0].id)); setGame("Counter-Strike 2"); } }]} />
       <div className="ai-controls">
         <div className="form-group">
           <label htmlFor="team-select">Your Team</label>
@@ -65,7 +69,7 @@ function StrategyAnalysis() {
           >
             <option value="">-- Select Your Team --</option>
             {teams.map((team) => (
-              <option key={team._id} value={team._id}>
+              <option key={team.id} value={team.id}>
                 {team.name}
               </option>
             ))}
@@ -81,7 +85,7 @@ function StrategyAnalysis() {
           >
             <option value="">-- Select Opponent Team --</option>
             {teams.map((team) => (
-              <option key={team._id} value={team._id}>
+              <option key={team.id} value={team.id}>
                 {team.name}
               </option>
             ))}
@@ -109,6 +113,7 @@ function StrategyAnalysis() {
       </div>
 
       <AIResultDisplay result={result} loading={loading} error={error} />
+      <AIAnalysisHistory entityType="team" entityId={teamId} />
     </div>
   );
 }

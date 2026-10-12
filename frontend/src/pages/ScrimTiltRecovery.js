@@ -1,7 +1,8 @@
+import { listData } from '../listData';
 import React, { useEffect, useState } from 'react';
 
 export default function ScrimTiltRecovery() {
   const [data, setData] = useState(null);
   useEffect(() => { fetch('/api/scrim-tilt-recovery').then(r => r.json()).then(setData).catch(() => setData(null)); }, []);
-  return <div className="page"><h1>Scrim Tilt Recovery</h1><p>Detect tilt patterns in scrims and suggest coach recovery interventions.</p><div className="stats-grid">{data && Object.entries(data.summary).map(([k,v]) => <div className="stat-card" key={k}><span>{k.replaceAll('_',' ')}</span><strong>{v}</strong></div>)}</div><div className="card">{(data?.players || []).map(p => <div key={p.player} style={{padding:12,borderBottom:'1px solid #e5e7eb'}}><strong>{p.player}</strong><div>{p.trigger} - {p.risk} - {p.action}</div></div>)}</div></div>;
+  return <div className="page"><h1>Scrim Tilt Recovery</h1><p>Detect tilt patterns in scrims and suggest coach recovery interventions.</p><div className="stats-grid">{data && Object.entries(data.summary || {}).map(([k,v]) => <div className="stat-card" key={k}><span>{k.replaceAll('_',' ')}</span><strong>{v}</strong></div>)}</div><div className="card">{listData(data?.players).map(p => <div key={p.player} style={{padding:12,borderBottom:'1px solid #e5e7eb'}}><strong>{p.player}</strong><div>{p.trigger} - {p.risk} - {p.action}</div></div>)}</div></div>;
 }

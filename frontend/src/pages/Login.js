@@ -9,6 +9,8 @@ function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const demoAvailable = Boolean(process.env.REACT_APP_DEMO_EMAIL && process.env.REACT_APP_DEMO_PASSWORD);
+
   const handleQuickLogin = () => {
     setEmail(process.env.REACT_APP_DEMO_EMAIL || '');
     setPassword(process.env.REACT_APP_DEMO_PASSWORD || '');
@@ -73,9 +75,10 @@ function Login() {
           </button>
         </form>
 
-        <button className="quick-login-btn" type="button" onClick={handleQuickLogin}>
-          Auto Fill Demo Credentials
+        <button className="quick-login-btn" type="button" disabled={!demoAvailable || loading} onClick={handleQuickLogin}>
+          Fill Demo Credentials
         </button>
+        {!demoAvailable && <p role="status">Demo credentials are not configured for this frontend. Enter your account credentials to sign in.</p>}
       </div>
     </div>
   );

@@ -1,3 +1,4 @@
+import { listData } from '../listData';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
@@ -16,7 +17,7 @@ function PlayerKdaObjectiveBar() {
       .get(url)
       .then((r) => {
         if (cancelled) return;
-        setData(r.data.data || []);
+        setData(listData(r.data));
       })
       .catch((e) => !cancelled && setError(e.message))
       .finally(() => !cancelled && setLoading(false));

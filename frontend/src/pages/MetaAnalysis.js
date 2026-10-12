@@ -1,3 +1,5 @@
+import FormattedAIReport from '../components/FormattedAIReport';
+import AIPresetButtons from '../components/AIPresetButtons';
 import React, { useState } from 'react';
 import axios from 'axios';
 
@@ -49,6 +51,7 @@ function MetaAnalysis() {
         <p>Summarize the current competitive meta for a game / region.</p>
       </div>
 
+      <AIPresetButtons prerequisite={undefined} presets={[{ label: 'Valorant North America', disabled: false, fill: () => { setGame("Valorant"); setRegion("NA"); setDays(30); } }, { label: 'League of Legends Korea', disabled: false, fill: () => { setGame("League of Legends"); setRegion("KR"); setDays(60); } }]} />
       <div className="ai-controls">
         <div className="form-group">
           <label htmlFor="meta-game">Game</label>
@@ -117,9 +120,7 @@ function MetaAnalysis() {
               )}
             </div>
             <div className="ai-result-body">
-              <pre style={{ whiteSpace: 'pre-wrap' }}>
-                {result.analysis || JSON.stringify(result, null, 2)}
-              </pre>
+              <FormattedAIReport response={result} />
             </div>
           </div>
         </div>

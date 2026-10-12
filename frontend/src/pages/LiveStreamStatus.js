@@ -1,3 +1,5 @@
+import AIPresetButtons from '../components/AIPresetButtons';
+import FormattedAIReport from "../components/FormattedAIReport";
 import React, { useState } from 'react';
 import axios from 'axios';
 
@@ -45,6 +47,7 @@ function LiveStreamStatus() {
         <p>Check live status across configured streaming providers (Twitch / YouTube).</p>
       </div>
 
+      <AIPresetButtons prerequisite={undefined} presets={[{ label: 'Twitch channels', disabled: false, fill: () => { setHandles("shroud, tarik"); } }, { label: 'Tournament channels', disabled: false, fill: () => { setHandles("valorant, eslcs"); } }]} />
       <div className="ai-controls">
         <div className="form-group">
           <label htmlFor="ls-handles">Channel Handles (comma-separated)</label>
@@ -61,7 +64,7 @@ function LiveStreamStatus() {
         <div className="ai-result-wrapper">
           <div className="ai-result-card">
             <div className="ai-result-body">
-              <pre style={{ whiteSpace: 'pre-wrap' }}>{JSON.stringify(result, null, 2)}</pre>
+              <FormattedAIReport response={result} />
             </div>
           </div>
         </div>

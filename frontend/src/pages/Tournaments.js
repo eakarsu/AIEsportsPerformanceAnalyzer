@@ -1,3 +1,4 @@
+import { listData } from '../listData';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -31,7 +32,7 @@ function Tournaments() {
   const fetchTournaments = async () => {
     try {
       const res = await axios.get('/api/tournaments', { headers: headers() });
-      setTournaments(Array.isArray(res.data) ? res.data : []);
+      setTournaments(listData(res.data));
     } catch (err) {
       setError('Failed to load tournaments');
       console.error(err);

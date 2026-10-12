@@ -1,3 +1,4 @@
+import { listData } from '../listData';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -30,7 +31,7 @@ function Teams() {
       setLoading(true);
       setError(null);
       const res = await axios.get('/api/teams', { headers });
-      setTeams(Array.isArray(res.data) ? res.data : []);
+      setTeams(listData(res.data));
     } catch (err) {
       setError('Failed to load teams. Please try again.');
       console.error(err);

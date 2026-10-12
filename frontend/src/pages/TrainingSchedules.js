@@ -1,3 +1,4 @@
+import { listData } from '../listData';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -44,8 +45,8 @@ function TrainingSchedules() {
         axios.get('/api/training', { headers: headers() }),
         axios.get('/api/players', { headers: headers() }),
       ]);
-      setTraining(Array.isArray(trainingRes.data) ? trainingRes.data : []);
-      setPlayers(Array.isArray(playersRes.data) ? playersRes.data : []);
+      setTraining(listData(trainingRes.data));
+      setPlayers(listData(playersRes.data));
     } catch (err) {
       setError('Failed to load data');
       console.error(err);

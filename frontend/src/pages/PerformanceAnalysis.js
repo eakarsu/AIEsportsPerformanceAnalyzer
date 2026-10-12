@@ -1,3 +1,6 @@
+import { listData } from '../listData';
+import AIAnalysisHistory from '../components/AIAnalysisHistory';
+import AIPresetButtons from '../components/AIPresetButtons';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -18,7 +21,7 @@ function PerformanceAnalysis() {
     const fetchPlayers = async () => {
       try {
         const response = await axios.get('/api/players', { headers });
-        setPlayers(response.data);
+        setPlayers(listData(response.data));
       } catch (err) {
         console.error('Failed to fetch players:', err);
       }
@@ -28,7 +31,7 @@ function PerformanceAnalysis() {
 
   useEffect(() => {
     if (selectedPlayer) {
-      const player = players.find(p => p._id === selectedPlayer);
+      const player = players.find(p => String(p.id) === selectedPlayer);
       setPlayerData(player || null);
     } else {
       setPlayerData(null);
@@ -63,6 +66,7 @@ function PerformanceAnalysis() {
         <p>AI-powered deep dive into player performance metrics</p>
       </div>
 
+      <AIPresetButtons prerequisite={"Load at least 2 real players to use all samples."} presets={[{ label: 'Opening player', disabled: players.length < 1, fill: () => { setSelectedPlayer(String(players[0].id)); } }, { label: 'Second player', disabled: players.length < 2, fill: () => { setSelectedPlayer(String(players[1].id)); } }]} />
       <div className="ai-controls">
         <div className="form-group">
           <label htmlFor="player-select">Select Player</label>
@@ -73,8 +77,8 @@ function PerformanceAnalysis() {
           >
             <option value="">-- Select a Player --</option>
             {players.map((player) => (
-              <option key={player._id} value={player._id}>
-                {player.name}
+              <option key={player.id} value={player.id}>
+                {player.username || player.real_name || player.name}
               </option>
             ))}
           </select>
@@ -145,6 +149,7 @@ function PerformanceAnalysis() {
       )}
 
       <AIResultDisplay result={result} loading={loading} error={error} />
+      <AIAnalysisHistory entityType="player" entityId={selectedPlayer} />
     </div>
   );
 }
