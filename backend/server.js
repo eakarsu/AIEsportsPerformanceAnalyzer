@@ -48,6 +48,8 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+app.use('/api/feature-pack', require('./routes/featurePack'));
+
 // Custom Views (4 endpoints) — mounted BEFORE 404 / error handler
 app.use('/api/custom-views', require('./routes/customViews'));
 
